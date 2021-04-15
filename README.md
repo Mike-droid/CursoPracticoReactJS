@@ -127,3 +127,85 @@ Ahora que entendemos cada una de las fases que tiene el ciclo de vida de react, 
 En React, el **estado** es un objeto al cual le podemos definir variables (string, númerico, booleanas, funciones). Vamos a poder acceder al estado en nuestro componente en el momento en que se inicializa.
 
 ### Instalación y configuración de entorno
+
+La carpeta public que adentro tiene "index.html" sirve para mandar el proyecto a producción.
+
+package-lock.josn sirve para el versionado de los paquetes que estemos usando.
+
+### Agregando compatibilidad con todos los navegadores usando Babel
+
+Babel es un transpilador de Javascript. Te permite usar sintaxís de ES6+ y transformará tu código a una versión anterior de JS para que todos los navegadores puedan entenderlo.
+
+- Babelcore: Construye nuestras herramientas modernas de JS.
+- BabelLoader: Trabaja con webpack así como los preset.
+
+## Configurar un entorno de trabajo profesional
+
+### Webpack: Empaquetando nuestros módulos
+
+Configuraciones en webpack.config.js:
+
+```javascript
+const path = require('path')
+const HtmlWepackPlugin = require('html-webpack-plugin')
+
+module.exports = {
+  entry: './src/index.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.js'
+  },
+  resolve: {
+    extensions: ['.js' , '.jsx']
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(js|jsx)$/, //*Regular expresion
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader"
+        }
+      },
+      {
+        test: /\.html$/,
+        use: [
+          {
+            loader: 'html-loader'
+          }
+        ]
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWepackPlugin({
+      template: './public/index.html',
+      filename: './index.html'
+    })
+  ]
+}
+```
+
+Creamos el nombre del script en package.json:
+
+`"build": "webpack --mode production"`
+
+Una vez ejecutado este comando, webpack creará una carpeta llamada "dist" y dentro tendremos el archivo bundle.js e index.hmtl ambos minimizados.
+
+### Webpack Dev Server: Reporte de errores y Cambios en tiempo real
+
+Después de haber instalado webpack-dev-server, tenemos en package.json: `"start": "webpack serve --mode development --env development"`. Lo que hace es encender el servidor en el puerto 8080 de nuestra computadora para ver los cambios en el navegador.
+
+### Estilos con SASS
+
+Tenemos que agregar las reglas al archivo webpack.config.js para que pueda manejar CSS y sus preprocesadores.
+
+### Configuración final: ESLint y Git Ignore
+
+Creamos un archivo '.eslintrc' que sirve para crear reglas de sintaxís en JS para que todos en un equipo escriban el código correctamente.
+
+El archivo '.gitignore' sirve para no tomar en cuenta archivos en nuestro proyecto para no ser mandados al repositorio remoto.
+
+### Arquitectura de componentes para Platzi Video
+
+[Link del repositorio](https://github.com/platzi/escuela-js/tree/feature/react)
