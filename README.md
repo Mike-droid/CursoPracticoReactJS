@@ -320,3 +320,136 @@ body {
   background: $main-color;
 }
 ```
+
+## Uso de una API de desarrollo (Fake API)
+
+### Creando una Fake API
+
+Traemos los datos de un JSON [de este enlace](https://gist.github.com/gndx/d4ca4739450afaa614efe4570ac362ee)
+
+***ADVERTENCIA***: el JSON empieza con 'initalState' en vez de 'initialState', hay que corregir para no tener errores.
+
+Instalaremos json-server para pretender que traemos datos de una API. Tenemos que hacer esto con privilegios de administrador.
+
+`sudo npm i json-server -g`
+
+Ejecutamos `json-server initialState.json` y tendremos un servidor en 'http://localhost:3000/initialState'.
+
+Y así tenemos lista nuestra fake API.
+
+### React Hooks: useEffect y useState
+
+React hooks está disponible desde la versión 16.8 en adelante.
+
+En resumen; useState nos devuelve un array con dos elementos. El 1ro es el valor de nuesro estado. El 2do es una función que nos permite actualizar ese valor. El argumento que le enviamos es por defecto el valor del estado(initial state).
+
+El hook 'useEffect' es una función que nos permite ejecutar código cuando se monta, desmonta o actualiza un componente. El primer argumento que recibe es una función que se ejecutará cuando React monte o actualice el componente. Esta función puede devolver otra funcion que se ejecuta cuando el componente se desmonte. El segundo argumento es una array donde podemos especificar qué propiedades deben cambiar para que Reacr vuelva a llamar nuestro código. Por defecto, cuando no enviamos un segundo argumento, React ejecutará 'useEffect' cada vez que el componente o componente padre se actualice. Si enviamos un array vacio la función solo se ejecuta al montar o desmontar el componente.
+
+Para poder usar async await en nuestro proyecto, debemos tener así el archivo .babelrc:
+
+```javascript
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "esmodules": true
+        }
+      }
+    ],
+    "@babel/preset-react"
+  ]
+}
+```
+
+Función asíncrona:
+
+```javascript
+const [videos, setVideos] = useState([]);
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/initialState');
+        const data = await response.json();
+        return setVideos(data);
+      } catch {
+        console.log(error);
+      }
+    };
+    fetchVideos();
+  }, []);
+
+  console.log(videos);
+```
+
+### Lectura React Hooks
+
+Los React Hooks son una característica de React que tenemos disponible a partir de la versión 16.8. Nos permiten agregar estado y ciclo de vida a nuestros componentes creados como funciones.
+
+El Hook useState nos devuelve un array con dos elementos: la primera posición es el valor de nuestro estado, la segunda es una función que nos permite actualizar ese valor.
+
+El argumento que enviamos a esta función es el valor por defecto de nuestro estado (initial state).
+
+```javascript
+import React, { useState } from 'react';
+
+const Component = () => {
+  const [name, setName] = useState('Nombre por defecto');
+
+  return <div>{name}</div>;
+}
+```
+
+El Hook useEffect nos permite ejecutar código cuando se monta, desmonta o actualiza nuestro componente.
+
+El primer argumento que le enviamos a useEffect es una función que se ejecutará cuando React monte o actualice el componente. Esta función puede devolver otra función que se ejecutará cuando el componente se desmonte.
+
+El segundo argumento es un array donde podemos especificar qué propiedades deben cambiar para que React vuelva a llamar nuestro código. Si el componente actualiza pero estas props no cambian, la función no se ejecutará.
+
+Por defecto, cuando no enviamos un segundo argumento, React ejecutará la función de useEffect cada vez que el componente o sus componentes padres actualicen. En cambio, si enviamos un array vacío, esta función solo se ejecutará al montar o desmontar el componente.
+
+```javascript
+import React, { useState, useEffect } from 'react';
+
+const Component = () => {
+  const [name, setName] = useState('Nombre por defecto');
+
+  useEffect(() => {
+    document.title = name;
+    return () => {
+      document.title = 'el componente se desmontó';
+    };
+  }, [name]);
+
+  return <div>{name}</div>;
+}
+```
+
+No olvides importar las funciones de los hooks desde la librería de React. También puedes usarlos de esta forma: React.useNombreDelHook.
+
+### Conectando la información de la API
+
+### ### Custom Hooks
+
+Es convención que a nuestros customs hooks les demos un nombre que empiece por 'use'.
+
+Nuestros custom hooks van dentro de una carpeta 'hooks' que a su vez va dentro de 'src'.
+
+### PropTypes
+
+Instalaremos `npm i prop-types`
+
+```javascript
+import propTypes from 'prop-types';
+
+//* PropTypes sirve para asegurarnos que la data que se esta consumiendo es la correcta y evitar así un posible error
+
+CarouselItem.propTypes = {
+  cover: propTypes.string,
+  title: propTypes.string,
+  year: propTypes.number,
+  contentRating: propTypes.string,
+  duration: propTypes.number,
+};
+```
