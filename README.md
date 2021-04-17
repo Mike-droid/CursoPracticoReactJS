@@ -209,3 +209,114 @@ El archivo '.gitignore' sirve para no tomar en cuenta archivos en nuestro proyec
 ### Arquitectura de componentes para Platzi Video
 
 [Link del repositorio](https://github.com/platzi/escuela-js/tree/feature/react)
+
+## LLevar un diseño de HTML y CSS a React
+
+### Estructura del Header
+
+Lo más recomendable es crear una carpeta 'containers', dentro estará el archivo 'App.jsx' y ahí insertaremos los componentes. En el archio index.js mandaremos a llamar a App.jsx.
+
+### Estilos del Header
+
+Es importante empezar a separar incluso los estilos por componentes. Tenemos una carpeta para cada estilo de cada componente dentro de la carpeta styles con sus respectivos archivos.
+
+### Estructura y estlos del buscador
+
+Esto realmente más de lo mismo.
+
+### Estructura y Estilos de Carousel y Carousel Item
+
+Más de lo mismo. Sin embargo, algo importante: Ya que un elemento tendrá hijos es importante pasar el props de 'children'.
+
+```javascript
+const Categories = ({ children }) => (
+  <div className='categories'>
+    <h3 className='categories__title'>Mi lista</h3>
+    {children}
+  </div>
+);
+```
+
+Así, al momento de escribir el componente en App.jsx este elemento podrá tener otros elementos dentro de él.
+
+Lo mismo pasa aquí:
+
+```javascript
+const Carousel = ({ children }) => (
+  <section className='carousel'>
+    <div className='carousel__container'>
+      { children }
+    </div>
+  </section>
+);
+```
+
+App.jsx :
+
+```javascript
+const App = () => (
+  <div className='App'>
+    <Header />
+    <Search />
+
+    <Categories>
+      <Carousel>
+        <CarouselItem />
+        <CarouselItem />
+        <CarouselItem />
+        <CarouselItem />
+      </Carousel>
+    </Categories>
+  </div>
+);
+```
+
+### Estructura y Estilos del Footer
+
+Más de lo mismo.
+
+### Añadiendo imágenes con Webpack
+
+Instalaremos una manejador de archivos para webpack. `npm i file-loader -D`.
+
+webpack.config.js:
+
+```javascript
+{
+  test: /\.(png|gif|jpg)$/, //*Cualquier elemento png, gif i jpg será usado dentro de nuestros proyectos
+    use: [
+      {
+        'loader': 'file-loader',
+          options: {
+            name: 'assets/[hash].[ext]', //*Guardará el archivo en assets, le dará un hash y conservará su extensión.
+          },
+      },
+    ],
+},
+```
+
+Mandamos a llamar a las imágenes como si fueran variables: `import logo from '../assets/static/logo-platzi-video-BW2.png';`.
+Y las traemos a React así: `<img className='header__img' src={logo} alt='Platzi Video' />`.
+
+### Imports, Variables y Fuentes de Google en Sass
+
+Creamos el archivo 'Vars.scss' para tener todos los valores importantes en los estilos.
+
+```scss
+@import url(https://fonts.googleapis.com/css?family=Muli&display=swap);
+
+$theme-font: 'Muli', sans-serif;
+$main-color: #8f57fd;
+```
+
+Utilizaremos estas variables en los demás archivos que sean necesarios, por ejemplo en App.scss:
+
+```scss
+@import './Vars.scss';
+
+body {
+  margin: 0;
+  font-family: $theme-font;
+  background: $main-color;
+}
+```

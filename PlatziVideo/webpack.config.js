@@ -38,6 +38,17 @@ module.exports = {
           'sass-loader',
         ],
       },
+      {
+        test: /\.(png|gif|jpg)$/, //*Cualquier elemento png, gif i jpg será usado dentro de nuestros proyectos
+        use: [
+          {
+            'loader': 'file-loader',
+            options: {
+              name: 'assets/[hash].[ext]', //*Guardará el archivo en assets, le dará un hash y conservará su extensión.
+            },
+          },
+        ],
+      },
     ],
   },
   plugins: [
