@@ -453,3 +453,7 @@ CarouselItem.propTypes = {
   duration: propTypes.number,
 };
 ```
+
+### Usar React Tools
+
+[Puedes descargar las React Developer Tools aquí](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=es)
