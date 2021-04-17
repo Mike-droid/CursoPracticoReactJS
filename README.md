@@ -457,3 +457,169 @@ CarouselItem.propTypes = {
 ### Usar React Tools
 
 [Puedes descargar las React Developer Tools aquí](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=es)
+
+# Curso de React Router y Redux
+
+## ¿Qué es React Router? y Aplicarlo en tus proyectos
+
+### ¿Qué es React Routery cómo instalarlo?
+
+React router es una libreria para react que te permite creas una SPA. Esto hace es que dependiendo la ruta en la que te
+encuentres en el navegador, react-router cambia el contenido de la pagina, pero sin recargarla.
+
+Se instala con: `npm i --save react-router-dom`
+
+### Crear nuestro archivos de Rutas
+
+Dentro de la carperta 'src' crearemos una carpeta 'routes' y dentro creamos el archivo App.js.
+
+```javascript
+import React from 'react';
+import { BrowserRouter, Route } from 'react-router-dom';
+import Home from '../containers/Home';
+
+const App = () => (
+  <BrowserRouter>
+    <Route exactpath='/' component={Home} />
+  </BrowserRouter>
+);
+
+export default App;
+
+```
+
+Lo que antes era "App.jsx" ahora es "Home.jsx"
+
+### Container: Login
+
+Cuando manejamos nuestro entorno de desarrollo local, debemos hacer que pueda manejar las rutas. Hacemos esto en el archivo de webpack.config.js:
+
+```javascript
+devServer: {
+    historyApiFallback: true,
+  }
+```
+
+### Container: Register
+
+Con `<Switch></Switch>` nos aseguraremos que cuando encuentre solamente la primera ruta, esa es la única que se va a renderizar.
+
+```javascript
+import React from 'react';
+import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import Home from '../containers/Home';
+import Login from '../containers/Login';
+import Register from '../containers/Register';
+
+const App = () => (
+  <BrowserRouter>
+    <Switch>
+      <Route exact path='/' component={Home} />
+      <Route exact path='/login' component={Login} />
+      <Route exact path='/register' component={Register} />
+    </Switch>
+  </BrowserRouter>
+);
+
+export default App;
+
+```
+
+Atributos para los Route Objetos:
+
+- path: la ruta en la que se renderizará el componente en forma de cadena de texto
+- exact: un booleano para definir si queremos que la ruta tiene o no que ser exacta para renderizar un componente. Eg: /index !== /index/all.
+- strict: un booleano para definir si queremos que el último slash sea tomado en cuenta para renderizar un componente. Eg: /index !== /index/.
+- sensitive: un booleano para definir si queremos distinguir entre minúsculas y mayúsculas, y tomar esto en cuenta para renderizar un componente. Eg: /index !== /Index
+- component: recibe un componente a renderizar. Crea un nuevo elemento de React cada vez. Esto causa que el componente se monte y desmonte cada vez (no actualiza)
+- render: recibe un método que retorna un componente. A diferencia de component no remonta el componente.
+
+### Container: 404 Not Found
+
+Podemos usar `<React.Fragment></React.Fragment>` para NO cargar HTML innecesario, por ejemplo en la página con cógido HTTP=404.
+Una forma más sencilla es utilizar los 'pico parantesis' y encerramos el HTML en `<> </>`.
+
+`<Route component={NotFound} />` Esta línea se usa para cuando introducimos un url que no existe en nuestro proyecto.
+
+### Componente: Layout
+
+Layout es un component y no un container para evitar que se renderizen componentes que no requieren constante actualización.
+Como el header y footer van a ser constantes en todo el sitio, es como dejarlos fijos.
+
+Creamos Layout.jsx:
+
+```javascript
+import React from 'react';
+import Header from './Header';
+import Footer from './Footer';
+
+const Layout = ({ children }) => (
+  <div className='App'>
+    <Header />
+    { children }
+    <Footer />
+  </div>
+);
+
+export default Layout;
+
+```
+
+Envolvemos el Switch en el Layout:
+
+```javascript
+import React from 'react';
+import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import Home from '../containers/Home';
+import Login from '../containers/Login';
+import Register from '../containers/Register';
+import NotFound from '../containers/NotFound';
+import Layout from '../components/Layout';
+
+const App = () => (
+  <BrowserRouter>
+    <Layout>
+      <Switch>
+        <Route exact path='/' component={Home} />
+        <Route exact path='/login' component={Login} />
+        <Route exact path='/register' component={Register} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
+  </BrowserRouter>
+);
+
+export default App;
+
+```
+
+Y en Home.jsx eliminamos las etiquetas de Home y Footer, además de envolver todo en picoparéntesis (o React Fragments).
+
+### Manejando enlaces y configuraciones
+
+En React usamos `import { Link } from 'react-router-dom';` para sustituir las etiquetas `<a></a>`. Esto porque Link hace la carga
+de las rutas más rápida, realmente no hace un refresh de las url, como lo hace la etiqueta ancla. Esto da más velocidad
+y una mejor experiencia de usuario.
+
+```javascript
+<Linkto="/" rel="canonical">
+	<imgsrc={Logo}widht="100" />
+</Link>
+```
+
+Usar **rel='canonical'** nos ayuda a evitar contenido identico o duplicado que aparezca en varias URL, y mejora el SEO.
+
+Si por ejemplo queremos que al hacer click en algo, nos lleve a una diferente sección de la misma página (Que una imagen nos
+lleve al footer haciendo scroll, hacemos lo siguiente:
+
+`$ npm install--save react-router-hash-link`
+
+Luego en tu componente:
+
+`import { HashLink as Link } from'react-router-hash-link';`
+
+Finalmente:
+
+`<Link to="home-page#section-three">Section three</Link>` y en otra etiqueta:
+
+`<div id='#section-three'>Hola</div>`
