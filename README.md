@@ -603,7 +603,7 @@ y una mejor experiencia de usuario.
 
 ```javascript
 <Linkto="/" rel="canonical">
-	<imgsrc={Logo}widht="100" />
+  <img src={Logo}widht="100" />
 </Link>
 ```
 
@@ -623,3 +623,70 @@ Finalmente:
 `<Link to="home-page#section-three">Section three</Link>` y en otra etiqueta:
 
 `<div id='#section-three'>Hola</div>`
+
+## ¿Qué es Redux?
+
+### Qué es Redux
+
+Redux es una librería de JS. Está basada en [la arquitectura Flux](https://carlosazaustre.es/como-funciona-flux)
+
+- [Redux en Wikipedia](https://es.wikipedia.org/wiki/Redux_(JavaScript))
+- [Página oficial de Redux](https://redux.js.org/)
+- [Repositorio de github de Redux](https://github.com/reduxjs/redux)
+
+Redux se basa en 3 principios fundamentales:
+
+1. Es una sola fuente de la verdad.
+2. El estado es de sólo lectura.
+3. Sólo podemos utilizar funciones puras.
+
+### ¿Qué es Redux? Profundizando en la herramienta
+
+Redux nos permite tener un contenedor predecible del estado en aplicaciones creadas con JavaScript, Nos ayuda a escribir aplicaciones que se comportan de una manera consistente, Esto significa que podemos utilizar esta lógica en aplicaciones del lado del cliente, trabajar del lado del servidor o crear aplicaciones para dispositivos móviles.
+
+Uno de los principales uso que tiene Redux es con React pero puede ser implementado en cualquier librería o proyecto que este construido con JavaScript, lo cual incluye a Angular, Vue o algún otro framework o librería.
+
+Redux nace de la arquitectura Flux, tomando inspiración del lenguaje funcional Elm y es creado por Dan Abramov y Andrew Clark en el 2015, Hoy en día es una de las librerías más utilizadas para el manejo del flujo de la información en aplicaciones.
+
+Una de las principales motivaciones para crear Redux nace en resolver un problema y era el manejo del estado y el flujo de nuestras aplicaciones creadas en JavaScript. Redux propone una forma de manejar el estado donde podamos controlar cómo vamos a interactuar con otros elementos (llamadas a un API) o interacciones dentro de nuestra aplicación, teniendo en cuenta esto, Redux intenta de predecir las mutaciones que pueda sufrir el estado, creando restricciones de cuando y como pueden ser ejecutadas las actualizaciones en nuestras aplicaciones.
+
+Redux es una librería muy pequeña que se puede incorporar en cualquier proyecto construido en JavaScript y se basa en tres principios:
+
+1. Única fuente de la verdad: Nuestra aplicación solo debe de tener un único Store y es la única fuente de información.
+2. El estado es de solo lectura: La única forma de modificar el estado es emitiendo un acción, este objeto describe lo que va a ocurrir.
+3. Los cambios se realizan con funciones puras: Para realizar cambios al estado es necesario utilizar Reducers los cuales son funciones puras que toman el estado anterior, una acción y devuelve un nuevo estado con las modificaciones necesarias.
+
+[Documentación oficial de Redux](https://redux.js.org/introduction/getting-started)
+
+### Instalación de Redux
+
+`npm i redux react-redux -D`
+
+Dentro de la carpeta 'src' creamos 2 carpetas, 'actions' y 'reducers'. Cada una de ellas tendrá un archivo index.js.
+
+Recuerden que se tiene que encapsular nuestra aplicación dentro de un provider, porque nada fuera del provider podrá acceder al store.
+
+El `<Provider />` hace que la store de Redux esté disponible para cualquier componente anidado que se haya incluido en la función connect().
+
+Dado que cualquier componente React en una aplicación React Redux se puede conectar, la mayoría de las aplicaciones mostrarán un `<Provider>` en el nivel superior, con el árbol de componentes completo de la aplicación dentro de él.
+
+Normalmente, no puede usar un componente conectado a menos que esté anidado dentro de un `<Provider>`.
+
+### Creando el Store de Redux
+
+- Esta basado en el patrón de diseño Flux
+- Toda la data de la aplicación, se encuentra en una estructura previamente definida.
+- Toda la informción se encontrará almacenada en un único lugar llamado STORE.
+- El STORE jamas se modifica de forma directa.
+- Interacciones de usuario y/o código, dispara acciones que describen qué sucedió
+- El valor actual de la información de la aplicación se llama - State
+- Un nuevo estado es creado, en base a la combinanción del viejo estado y una acción, por una función llamada Reducer.
+
+Creando el Store de Redux
+
+Para crear un Store necesitamos llamar a la función createStore del paquete de redux pasándole los parámetros del reducer y initialState.
+
+Para conectar un componente a Redux vamos a necesitar importar connect de react-redux, connect va a aceptar dos parámetros:
+
+mapStateToProps: es una función que le va a indicar al provider qué información necesitamos del store.
+mapDispatchToProps: es un objeto con las distintas funciones para ejecutar una action en Redux.
