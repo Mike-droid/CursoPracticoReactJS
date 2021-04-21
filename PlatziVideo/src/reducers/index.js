@@ -34,9 +34,21 @@ const reducer = (state, action) => {
       return {
         ...state,
         playing: state.trends.find((item) => item.id === Number(action.payload)) ||
-        state.original.find(() => item.id === Number(action.payload)) ||
+        state.originals.find(() => item.id === Number(action.payload)) ||
         [], //*El valor llega como string así que hay que convertirlo a número.
         //*Si no coincide ningún valor, regresamos un array vacío.
+      };
+    case actions.getVideoSearch:
+      if (action.payload === '') {
+        return {
+          ...state,
+          searchResult: [],
+        };
+      };
+      const lists = [...state.trends, ...state.originals];
+      return {
+        ...state,
+        searchResult: lists.filter((item) => item.title.toLowerCase().includes(action.payload.toLowerCase())),
       };
     default:
       return state;
