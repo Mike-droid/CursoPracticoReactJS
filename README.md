@@ -690,3 +690,618 @@ Para conectar un componente a Redux vamos a necesitar importar connect de react-
 
 mapStateToProps: es una función que le va a indicar al provider qué información necesitamos del store.
 mapDispatchToProps: es un objeto con las distintas funciones para ejecutar una action en Redux.
+
+## Aplicando Redux a nuesta aplicación
+
+### Creando los reducers
+
+[Este vídeo de ED Team ayuda mucho a entender mejor React con Redux](https://youtu.be/HhtqSwUgP1U)
+
+### Finalizando reducers y eliminar favoritos
+
+El método filter crea un nuevo array con todos los elementos que cumplen una condición.
+
+index.js en actions para saber qué acciones son las que haremos:
+
+```javascript
+export const setFavorite = (payload) => ({
+  type: 'SET_FAVORITE',
+  payload,
+});
+
+export const deleteFavorite = (payload) => ({
+  type: 'DELETE_FAVORITE',
+  payload,
+});
+
+```
+
+index.js en reducers para insertar y eliminar elementos:
+
+```javascript
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_FAVORITE':
+      return {
+        ...state,
+        myList: [...state.myList, action.payload],
+      };
+    case 'DELETE_FAVORITE':
+      return {
+        ...state,
+        myList: state.myList.filter((items) => items.id !== action.payload), //!Es importante tomar en cuenta el ID
+      };
+    default:
+      return state;
+  }
+};
+
+export default reducer;
+
+```
+
+En CarouselItem.jsx es donde ocurrirán estas acciones:
+
+```javascript
+import { connect } from 'react-redux';
+import { setFavorite, deleteFavorite } from '../actions'; //*No hace falta llamar a un archivo porque tenemos un index
+
+const CarouselItem = (props) => {
+  const { id, cover, title, year, contentRating, duration } = props;
+	const handleSetFavorite = () => {
+		props.setFavorite({
+			id, cover, title, year, contentRating, duration,
+		});
+	};
+	const handleDeleteFavorite = (itemId) => {
+		props.deleteFavorite(itemId);
+	};
+}
+
+const mapDispatchToProps = {
+  setFavorite,
+  deleteFavorite,
+};
+
+export default connect(null, mapDispatchToProps)(CarouselItem);
+
+```
+
+### Debugeando nuestro proyecto (agregando validaciones a nuestro componente card)
+
+Hicimos 2 validaciones, no agregar ni elementos infinitos ni el mismo elemento.
+
+Home.jsx:
+
+```javascript
+{
+  myList.map((item) =>
+    <CarouselItem
+      key={item.id}
+      {...item}
+      isList
+    />
+  )
+}
+```
+
+CarouselItem.jsx :
+
+```javascript
+const { id, cover, title, year, contentRating, duration, isList } = props;
+
+{/*Pasamos isList en las props y hacemos una validación*/}
+
+{
+isList ?
+  <img
+    className='carousel-item__details--img'
+    src={removeIcon}
+    alt='Remove Icon'
+    onClick={() => handleDeleteFavorite(id)}
+  /> :
+  <img
+    className='carousel-item__details--img'
+    src={plusIcon}
+    alt='Plus Icon'
+    onClick={handleSetFavorite}
+  />
+}
+```
+
+Para evitar repetir un mismo elemento, en index.js:
+
+```javascript
+//*Dentro del case de add favorite
+
+const exist = state.myList.find((item) => item.id === action.payload.id);
+if (exist) return { ...state };
+```
+
+### Crear Formulario de Login
+
+Recordar: Usamos hooks con `useState`.
+
+Para obtener los datos de un formulario;
+
+Login.jsx:
+
+```javascript
+import React, { useState } from 'react';
+
+const Login = () => {
+
+  const [form, setValues] = useState({
+    email: '',
+  });
+
+  const handleInput = (event) => {
+    setValues({
+      ...form,
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault(form); //*Para que no se haga la acción de enviar formulario
+    console.log(form);
+  };
+
+  return (
+  <form
+    className='login__container--form'
+    onSubmit={handleSubmit}
+  >
+    <input
+      name='email'
+      className='input'
+      type='text'
+      placeholder='Correo'
+      onChange={handleInput}
+    />
+    <input
+      name='passwrod'
+      className='input'
+      type='password'
+      placeholder='Contraseña'
+      onChange={handleInput}
+    />
+  </form>
+  );
+};
+```
+
+### Formulario de Login con Redux
+
+Vamos a mandar nuestra información a nuestro estado con Redux. Aquí simulamos un login.
+
+index.js de actions:
+
+```javascript
+export const loginRequest = (payload) => ({
+  type: actions.loginRequest,
+  payload,
+});
+```
+
+Login.jsx:
+
+```javascript
+import { loginRequest } from '../actions'; //*No haec falta escribir el index porque ya se entiende que se quiere ese archivo al tener ese nombre
+
+const Login = (props) => {
+
+  const handleSubmit = (event) => {
+    event.preventDefault(); //*Para que no se haga la acción de enviar formulario
+    props.loginRequest(form);
+    props.history.push('/'); //*Redirigimos al usuario al home
+  };
+};
+
+const mapDispatchToProps = {
+  loginRequest,
+};
+
+export default connect(null, mapDispatchToProps)(Login);
+
+```
+
+index.js de reducers:
+
+```javascript
+case actions.loginRequest:
+  return {
+    ...state,
+    user: action.payload,
+  };
+```
+
+### Creando un Servicio para Gravatar
+
+Es el avatar de la imagen del header.
+
+Podemos usar gravatar [desde su sitio web](https://es.gravatar.com/) o instalarlo con NPM pero esta **no** es la mejor opción. El paquete de NPM contiene muchas funciones que no vamos a utilizar así que es mejor no instalarlo.
+
+Dentro de 'src' creamos la carpeta 'utils' y dentro creamos el archivo gravatar.js
+
+Lo que sí necesitamos es MD5, `npm i md5 -D`. MD5 es un servicio criptográfico para crear un hash a partir de un e-mail.
+
+[Documentación de Mozilla para el método trim](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/String/Trim) (en resumen, elimina los espacios en blanco).
+
+gravatar.js:
+
+```javascript
+import md5 from 'md5';
+
+const gravatar = (email) => {
+  const base = 'https://gravatar.com/avatar/';
+  const formatEmail = email.trim().toLowerCase();
+  const hash = md5(formatEmail, { encoding: 'binary' });
+  return `${base}${hash}`;
+};
+
+export default gravatar;
+
+```
+
+### Uso de gravatar en nuestro proyecto
+
+Header.jsx:
+
+```javascript
+import gravatar from '../utils/gravatar';
+
+const Header = (props) => {
+  const { user = {} } = props;
+  const hasUser = object.keys(user).length > 0 ; //*object.keys() lo usamos como si fuera un array para poder usar el método length
+  return (
+    {
+      hasUser ?
+        <img src={gravatar(user.email)} alt={user.email} /> :
+        <img src={userIcon} alt='User pic' />
+    }
+  );
+};
+
+const mapStateToProps = (state) => {
+  return {
+    user: state.user,
+  };
+};
+
+export default connect(mapStateToProps, null)(Header);
+
+```
+
+### Validación para LogIn LogOut
+
+Básicamente, la función connect recibe dos parámetros:
+
+1. mapStateToProps
+2. mapDispatchToProps
+
+En palabras resumidas, la primera solicita datos del store(la base de datos)
+y el segundo envía datos y dispara acciones para interactuar con el store.
+
+Así solamente hay un flujo de datos y todo es mas simple.
+
+[Documentación oficial de Verificación de tipos con PropTypes - React](https://es.reactjs.org/docs/typechecking-with-proptypes.html)
+
+[PropTypes en NPM](https://www.npmjs.com/package/prop-types)
+
+index.js de actions:
+
+```javascript
+export const actions = {
+  setFavorite: 'SET_FAVORITE',
+  deleteFavorite: 'DELETE_FAVORITE',
+  loginRequest: 'LOGIN_REQUEST',
+  logoutRequest: 'LOGOUT_REQUEST',
+};
+
+export const logoutRequest = (payload) => ({
+  type: actions.logoutRequest,
+  payload,
+});
+
+```
+
+index.js de reducers:
+
+```javascript
+case actions.logoutRequest:
+  return {
+    ...state,
+    user: action.payload,
+  };
+
+```
+
+Header.jsx
+
+```javascript
+import PropTypes from 'prop-types';
+import { logoutRequest } from '../actions';
+
+const Header = (props) => {
+  const { user = {} } = props;
+  const hasUser = Object.keys(user).length > 0 ; //*Object.keys() lo usamos como si fuera un array para poder usar el método length
+
+  const handleLogout = () => {
+    props.logoutRequest({}); //*Al mandar un objeto vacío, se reinicia el estado y ya no hay usuario
+  };
+
+  Header.propTypes = {
+    user: PropTypes.object,
+  };
+};
+
+<div className='header__menu'>
+  <div className='header__menu--profile'>
+    {
+      hasUser ?
+        <img src={gravatar(user.email)} alt={user.email} /> :
+        <img src={userIcon} alt='User pic' />
+    }
+    <p>Perfil</p>
+  </div>
+  <ul>
+    {
+      hasUser ?
+        <li><Link to='/'>{user.name}</Link></li> :
+        null
+    }
+    {
+      hasUser ?
+        <li><a href='#logout' onClick={handleLogout}>Cerrar sesión</a></li> :
+        <li><Link to='/login'>Iniciar sesión</Link></li>
+    }
+  </ul>
+</div>
+
+const mapStateToProps = (state) => {
+  return {
+    user: state.user,
+  };
+};
+
+const mapDispatchToProps = {
+  logoutRequest,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);
+
+```
+
+### Register
+
+Vamos a usar hooks para los inputs.
+
+Register.jsx:
+
+```javascript
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import '../assets/styles/components/Register.scss';
+
+const Register = () => {
+  const [form, setValues] = useState({
+    email: '',
+    name: '',
+    password: '',
+  });
+
+  const handleInput = (event) => {
+    setValues({
+      ...form,
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log(form);
+  };
+
+  return (
+    <section className='register'>
+      <section className='register__container'>
+        <h2>Regístrate</h2>
+        <form className='register__container--form' onSubmit={handleSubmit}>
+          <input
+            name='name'
+            className='input'
+            type='text'
+            placeholder='Nombre'
+            onChange={handleInput}
+          />
+          <input
+            name='email'
+            className='input'
+            type='text'
+            placeholder='Correo'
+            onChange={handleInput}
+          />
+          <input
+            name='password'
+            className='input'
+            type='password'
+            placeholder='Contraseña'
+            onChange={handleInput}
+          />
+          <button className='button' type='submit'>Registrarme</button>
+        </form>
+        <Link to='/login'>Iniciar sesión</Link>
+      </section>
+    </section>
+  );
+};
+
+export default Register;
+
+```
+
+### Register con Redux
+
+index.js de actions:
+
+```javascript
+export const actions = {
+  setFavorite: 'SET_FAVORITE',
+  deleteFavorite: 'DELETE_FAVORITE',
+  loginRequest: 'LOGIN_REQUEST',
+  logoutRequest: 'LOGOUT_REQUEST',
+  registerRequest: 'REGISTER_REQUEST',
+};
+```
+
+index.js en reducers:
+
+```javascript
+case actions.registerRequest:
+  return {
+    ...state,
+    user: action.payload,
+};
+```
+
+Register.jsx:
+
+```javascript
+import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { registerRequest } from '../actions';
+
+const Register = (props) => {
+  const [form, setValues] = useState({
+    email: '',
+    name: '',
+    password: '',
+  });
+
+  const handleInput = (event) => {
+    setValues({
+      ...form,
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    props.registerRequest(form);
+    props.history.push('/');
+  };
+};
+
+const mapDispatchToProps = {
+  registerRequest,
+};
+
+export default connect(null, mapDispatchToProps)(Register);
+
+```
+
+### Vista general del player
+
+Creamos el archivo Player.jsx dentro de containers:
+
+```javascript
+import React from 'react';
+import '../assets/styles/components/Player.scss';
+
+const Player = () => {
+  return (
+    <div className='Player'>
+      <video controls autoPlay>
+        <source src='' type='video/mp4' />
+      </video>
+      <div className='Player-back'>
+        <button type='button'>
+          Regresar
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default Player;
+
+```
+
+[Estilos Player.scss](https://static.platzi.com/media/tmp/class-files/git/escuela-js/escuela-js-0b8424b25f04a305cf0666a8b91ebf74b9f2140e/src/assets/styles/components/Player.scss)
+
+Agregamos una ruta nueva a App.js:
+
+```javascript
+import Player from '../containers/Player';
+
+<Route exact path='/player/:id' component={Player} />
+```
+
+Modificamos CarouselItem.jsx
+
+```javascript
+import { Link } from 'react-router-dom';
+
+<Link to={`/player/${id}`}>
+  {/*Creamos una url por cada elemento que iteramos*/}
+  <img
+    className='carousel-item__details--img'
+    src={playIcon}
+    alt='Play Icon'
+  />
+</Link>
+```
+
+### Arreglando la funcionalidad del player
+
+Por medio de las props podemos obtener el id del vídeo.
+
+Regresamos a la pantalla anterior con esto en Plyer.jsx:
+
+```javascript
+const Player = (props) => {
+  const { id } = props.match.params; //*Esto nos lo manda router
+  return (
+    <button type='button' onClick={() => props.history.goBack()}>
+      Regresar
+    </button>
+  );
+};
+
+export default Player;
+
+```
+
+Agregamos publicPath al output del archivo webpack.config.js:
+
+```javascript
+output: {
+  path: path.resolve(__dirname, 'dist'),
+  filename: 'bundle.js',
+  publicPath: '/',
+}
+```
+
+Y reiniciamos el servidor.
+
+### Terminando de detaller nuestro player
+
+### Validaciones
+
+`npm i classnames -S`
+
+### Validaciones de UI
+
+### Debug con Redux Devtools
+
+Tenemos que descargar e instalar las [Redux DevTools en la Chrome Web Store.](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd/related?hl=es)
+
+En el archivo principal index.js:
+
+```javascript
+const composeEnhacers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ && window.__REDUX_DEVTOOLS_EXTENSION__();
+
+const store = createStore(reducer, initialState, composeEnhacers);
+```
